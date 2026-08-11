@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Cabinet — Whiskey Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#191410;
+    --surface:#241c15;
+    --surface-alt:#2e2419;
+    --rule:#4a3c2c;
+    --text:#ede1cc;
+    --muted:#a08f76;
+    --copper:#be6a30;
+    --copper-bright:#e08a46;
+    --teal:#4f7a72;
+    --teal-bright:#6fa89d;
+    --gold:#d4a24c;
+    --danger:#a0453a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at top left, rgba(190,106,48,0.08), transparent 45%),
+      radial-gradient(ellipse at bottom right, rgba(79,122,114,0.06), transparent 50%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  .display{font-family:'Fraunces',serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  header.top{
+    padding:48px 32px 28px;
+    border-bottom:1px solid var(--rule);
+    max-width:1200px;
+    margin:0 auto;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--copper-bright);
+    margin:0 0 10px;
+  }
+  h1.title{
+    font-size:clamp(32px,5vw,52px);
+    font-weight:600;
+    font-optical-sizing:auto;
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+  }
+  .tagline{
+    color:var(--muted);
+    font-size:15px;
+    font-style:italic;
+    font-family:'Fraunces',serif;
+    margin:0 0 26px;
+  }
+
+  .stats-strip{
+    display:flex;
+    gap:0;
+    flex-wrap:wrap;
+    border-top:1px solid var(--rule);
+  }
+  .stat{
+    flex:1;
+    min-width:130px;
+    padding:16px 20px 0;
+    border-right:1px solid var(--rule);
+  }
+  .stat:last-child{border-right:none;}
+  .stat-value{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:24px;
+    font-weight:500;
+    color:var(--copper-bright);
+  }
+  .stat-label{
+    font-size:10px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-top:4px;
+  }
+
+  main{max-width:1200px;margin:0 auto;padding:0 32px;}
+
+  .tabs{
+    display:flex;
+    gap:4px;
+    margin:36px 0 0;
+  }
+  .tab-btn{
+    background:none;
+    border:none;
+    border-bottom:2px solid transparent;
+    color:var(--muted);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    padding:12px 4px;
+    margin-right:28px;
+    cursor:pointer;
+    transition:color .15s, border-color .15s;
+  }
+  .tab-btn.active{color:var(--text);border-bottom-color:var(--copper);}
+  .tab-btn[data-tab="wishlist"].active{border-bottom-color:var(--teal);}
+
+  .toolbar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+    padding:20px 0;
+    border-bottom:1px solid var(--rule);
+    margin-bottom:28px;
+  }
+  input[type="text"], select{
+    background:var(--surface);
+    border:1px solid var(--rule);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    padding:9px 12px;
+    border-radius:3px;
+    outline:none;
+  }
+  input[type="text"]:focus, select:focus, button:focus-visible{
+    border-color:var(--copper-bright);
+    box-shadow:0 0 0 2px rgba(224,138,70,0.2);
+  }
+  #search{flex:1;min-width:180px;}
+  .btn{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.05em;
+    border:1px solid var(--rule);
+    background:var(--surface);
+    color:var(--text);
+    padding:9px 16px;
+    border-radius:3px;
+    cursor:pointer;
+    transition:background .15s,border-color .15s;
+    white-space:nowrap;
+  }
+  .btn:hover{background:var(--surface-alt);}
+  .btn-primary{
+    background:var(--copper);
+    border-color:var(--copper);
+    color:#1a1208;
+    font-weight:500;
+  }
+  .btn-primary:hover{background:var(--copper-bright);}
+  .btn-primary.teal{background:var(--teal);border-color:var(--teal);}
+  .btn-primary.teal:hover{background:var(--teal-bright);}
+  .btn-ghost{background:none;}
+  .btn-small{padding:5px 10px;font-size:11px;}
+  .spacer{flex:1;}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:18px;
+    margin-bottom:40px;
+  }
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--rule);
+    border-radius:4px;
+    padding:20px;
+    position:relative;
+    transition:border-color .15s, transform .15s;
+  }
+  .card:hover{border-color:var(--copper);}
+  .card.wish:hover{border-color:var(--teal);}
+
+  .card-eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .badge{
+    position:absolute;
+    top:16px;
+    right:16px;
+    width:40px;height:40px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    font-weight:500;
+    color:#1a1208;
+    box-shadow:inset 0 0 0 2px rgba(0,0,0,0.15);
+  }
+  .badge.target{
+    background:var(--teal-bright);
+    font-size:11px;
+    border-radius:6px;
+    width:auto;
+    min-width:40px;
+    padding:0 8px;
+    height:26px;
+    top:20px;
+  }
+
+  .card-name{
+    font-family:'Fraunces',serif;
+    font-size:21px;
+    font-weight:600;
+    margin:6px 60px 2px 0;
+    line-height:1.15;
+  }
+  .card-sub{
+    color:var(--muted);
+    font-size:12.5px;
+    margin-bottom:14px;
+  }
+  .rule{
+    border:none;
+    border-top:1px solid var(--rule);
+    margin:0 0 14px;
+  }
+  .data-row{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--muted);
+    margin-bottom:12px;
+  }
+  .data-row span b{color:var(--text);font-weight:500;}
+  .notes{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-size:13px;
+    color:#c9bca3;
+    line-height:1.4;
+    margin-bottom:14px;
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .meta-line{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:14px;
+  }
+  .card-actions{
+    display:flex;
+    gap:8px;
+  }
+
+  .empty{
+    text-align:center;
+    padding:70px 20px;
+    color:var(--muted);
+  }
+  .empty .display{font-size:22px;color:var(--text);margin-bottom:8px;}
+
+  /* Modal */
+  .overlay{
+    display:none;
+    position:fixed;inset:0;
+    background:rgba(10,8,5,0.7);
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 20px;
+    overflow-y:auto;
+    z-index:100;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--surface-alt);
+    border:1px solid var(--rule);
+    border-radius:6px;
+    padding:30px;
+    max-width:520px;
+    width:100%;
+  }
+  .modal h2{
+    font-family:'Fraunces',serif;
+    font-size:24px;
+    margin:0 0 20px;
+  }
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .field input, .field textarea, .field select{
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--rule);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    padding:9px 11px;
+    border-radius:3px;
+    outline:none;
+  }
+  .field textarea{resize:vertical;min-height:60px;font-family:'Fraunces',serif;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:22px;
+  }
+
+  footer.util{
+    max-width:1200px;
+    margin:20px auto 0;
+    padding:20px 32px;
+    border-top:1px solid var(--rule);
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  footer.util .note{color:var(--muted);font-size:11.5px;font-family:'IBM Plex Mono',monospace;}
+
+  @media(max-width:600px){
+    header.top{padding:32px 18px 20px;}
+    main{padding:0 18px;}
+    .row2,.row3{grid-template-columns:1fr;}
+    footer.util{padding:16px 18px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <p class="eyebrow">Personal Cellar Ledger</p>
+  <h1 class="title display">The Cabinet</h1>
+  <p class="tagline">Every bottle earns its shelf. Every wish gets a line.</p>
+  <div class="stats-strip">
+    <div class="stat"><div class="stat-value mono" id="stat-count">0</div><div class="stat-label">bottles held</div></div>
+    <div class="stat"><div class="stat-value mono" id="stat-invested">$0</div><div class="stat-label">invested</div></div>
+    <div class="stat"><div class="stat-value mono" id="stat-rating">—</div><div class="stat-label">avg rating</div></div>
+    <div class="stat"><div class="stat-value mono" id="stat-wish">0</div><div class="stat-label">on wish list</div></div>
+  </div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="inventory" onclick="switchTab('inventory')">Cabinet</button>
+    <button class="tab-btn" data-tab="wishlist" onclick="switchTab('wishlist')">Wish List</button>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Search name, distillery, notes…" oninput="render()">
+    <select id="filterType" onchange="render()"><option value="">All types</option></select>
+    <select id="sortBy" onchange="render()">
+      <option value="name">Sort: Name A–Z</option>
+      <option value="rating">Sort: Rating (high–low)</option>
+      <option value="priceHigh">Sort: Price (high–low)</option>
+      <option value="priceLow">Sort: Price / Target (low–high)</option>
+      <option value="recent">Sort: Recently added</option>
+    </select>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" id="addBtn" onclick="openForm()">+ Add Bottle</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="emptyState" style="display:none;">
+    <div class="display" id="emptyTitle">The shelf is bare</div>
+    <div id="emptySub">Add your first bottle to start the ledger.</div>
+  </div>
+</main>
+
+<footer class="util">
+  <button class="btn btn-small" onclick="exportData()">Export backup (.json)</button>
+  <label class="btn btn-small" style="cursor:pointer;">
+    Import backup
+    <input type="file" accept="application/json" onchange="importData(event)" style="display:none;">
+  </label>
+  <button class="btn btn-small" id="syncBtn" onclick="openSyncModal()">Cloud Sync</button>
+  <span class="note" id="syncStatus">Not connected — data is stored locally in this browser only.</span>
+</footer>
+
+<!-- Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 class="display" id="modalTitle">Add Bottle</h2>
+    <form id="entryForm" onsubmit="saveEntry(event)">
+      <input type="hidden" id="f-id">
+      <div class="field">
+        <label>Name</label>
+        <input type="text" id="f-name" required>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Distillery</label>
+          <input type="text" id="f-distillery">
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <input type="text" id="f-type" list="typeList" placeholder="Bourbon, Rye, Scotch…">
+          <datalist id="typeList">
+            <option value="Bourbon"><option value="Rye"><option value="Scotch">
+            <option value="Irish"><option value="Japanese"><option value="Wheated Bourbon">
+            <option value="Blended"><option value="Single Malt"><option value="Other">
+          </datalist>
+        </div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>Region</label><input type="text" id="f-region"></div>
+        <div class="field"><label>Proof</label><input type="text" id="f-proof" placeholder="e.g. 100"></div>
+        <div class="field"><label>Age</label><input type="text" id="f-age" placeholder="e.g. 12 yr / NAS"></div>
+      </div>
+      <div class="field">
+        <label>Mash Bill</label>
+        <input type="text" id="f-mashbill" placeholder="e.g. 75% corn, 21% rye, 4% barley">
+      </div>
+
+      <div id="inventoryFields">
+        <div class="row3">
+          <div class="field"><label>Purchase Price ($)</label><input type="text" id="f-price"></div>
+          <div class="field"><label>Purchase Date</label><input type="date" id="f-date"></div>
+          <div class="field"><label>Store</label><input type="text" id="f-store"></div>
+        </div>
+        <div class="field">
+          <label>Rating (0–10)</label>
+          <input type="number" id="f-rating" min="0" max="10" step="0.5">
+        </div>
+      </div>
+
+      <div id="wishlistFields">
+        <div class="row2">
+          <div class="field"><label>Target Price ($)</label><input type="text" id="f-targetprice"></div>
+          <div class="field"><label>Where to Find It</label><input type="text" id="f-wheretofind"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label id="notesLabel">Tasting Notes</label>
+        <textarea id="f-notes"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn" onclick="closeForm()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="saveBtn">Save Bottle</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Sync Modal -->
+<div class="overlay" id="syncOverlay">
+  <div class="modal">
+    <h2 class="display">Cloud Sync</h2>
+    <p style="color:var(--muted);font-size:13px;line-height:1.5;margin-top:-8px;">
+      Syncs your cabinet across devices in real time using a sync code — no account needed. Use the same code on every device.
+    </p>
+
+    <div id="syncNotConnected">
+      <div class="field">
+        <button type="button" class="btn btn-primary" style="width:100%;" onclick="startFreshSync()">Start Fresh — Create a Sync Code</button>
+      </div>
+      <p style="text-align:center;color:var(--muted);font-size:11px;margin:14px 0;">— or —</p>
+      <div class="field">
+        <label>I Have a Sync Code</label>
+        <input type="text" id="sync-code-input" placeholder="e.g. OAK-BARREL-4821" style="text-transform:uppercase;">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" onclick="closeSyncModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="connectWithCode()">Connect</button>
+      </div>
+    </div>
+
+    <div id="syncConnected" style="display:none;">
+      <div class="field">
+        <label>Your Sync Code</label>
+        <input type="text" id="sync-code-display" readonly style="font-family:'IBM Plex Mono',monospace;letter-spacing:0.05em;">
+      </div>
+      <p class="note" style="color:var(--muted);font-size:11.5px;font-family:'IBM Plex Mono',monospace;line-height:1.5;">
+        Enter this exact code on your other devices to connect them to the same cabinet.
+      </p>
+      <div class="modal-actions" style="justify-content:space-between;">
+        <button type="button" class="btn" onclick="disconnectSync()">Disconnect</button>
+        <div style="display:flex;gap:10px;">
+          <button type="button" class="btn" onclick="copySyncCode()">Copy Code</button>
+          <button type="button" class="btn btn-primary" onclick="closeSyncModal()">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--
+  FIREBASE SETUP — see setup instructions provided alongside this file.
+  Paste your Firebase project's web config into FIREBASE_CONFIG below.
+-->
+<script>
+window.onerror = function(msg, url, line, col, err){
+  var el = document.getElementById('debugError');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'debugError';
+    el.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#a0453a;color:#fff;padding:12px 16px;font-family:monospace;font-size:12px;z-index:9999;white-space:pre-wrap;';
+    document.body.prepend(el);
+  }
+  el.textContent = 'JS ERROR: ' + msg + '  (line ' + line + ')';
+  return false;
+};
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBEbligMTPn7JUPeeYkaak23hLtQJ8G-dU",
+  authDomain: "whiskey-shelf-6a193.firebaseapp.com",
+  projectId: "whiskey-shelf-6a193",
+  storageBucket: "whiskey-shelf-6a193.firebasestorage.app",
+  messagingSenderId: "321584447812",
+  appId: "1:321584447812:web:639c2c02012c9c912c9711",
+  measurementId: "G-JMW1228HFT"
+};
+</script>
+
+<script>
+const STORAGE_KEYS = { inventory: 'whiskeyCabinet_inventory', wishlist: 'whiskeyCabinet_wishlist' };
+let state = { inventory: [], wishlist: [] };
+let currentTab = 'inventory';
+let editingId = null;
+
+function load(){
+  try{ state.inventory = JSON.parse(localStorage.getItem(STORAGE_KEYS.inventory)) || []; }catch(e){ state.inventory = []; }
+  try{ state.wishlist = JSON.parse(localStorage.getItem(STORAGE_KEYS.wishlist)) || []; }catch(e){ state.wishlist = []; }
+}
+function persist(shouldSync){
+  localStorage.setItem(STORAGE_KEYS.inventory, JSON.stringify(state.inventory));
+  localStorage.setItem(STORAGE_KEYS.wishlist, JSON.stringify(state.wishlist));
+  if(shouldSync !== false) queuePush();
+}
+
+function switchTab(tab){
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.getElementById('addBtn').textContent = tab==='inventory' ? '+ Add Bottle' : '+ Add to Wish List';
+  document.getElementById('addBtn').className = 'btn btn-primary' + (tab==='wishlist' ? ' teal' : '');
+  populateTypeFilter();
+  render();
+}
+
+function populateTypeFilter(){
+  const list = state[currentTab];
+  const types = [...new Set(list.map(i=>i.type).filter(Boolean))].sort();
+  const sel = document.getElementById('filterType');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">All types</option>' + types.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+  sel.value = types.includes(current) ? current : '';
+}
+
+function ratingColor(r){
+  // interpolate muted brown -> gold across 0-10
+  const t = Math.max(0, Math.min(10, r)) / 10;
+  const c1 = [122,98,70], c2 = [212,162,76];
+  const c = c1.map((v,i)=> Math.round(v + (c2[i]-v)*t));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+function escapeHtml(s){
+  if(s===undefined||s===null) return '';
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function fmtMoney(v){
+  const n = parseFloat(v);
+  if(isNaN(n)) return null;
+  return '$' + n.toLocaleString(undefined,{minimumFractionDigits:0, maximumFractionDigits:2});
+}
+
+function matchesSearch(item, q){
+  if(!q) return true;
+  q = q.toLowerCase();
+  return [item.name,item.distillery,item.notes,item.type,item.region].some(f => (f||'').toLowerCase().includes(q));
+}
+
+function sortList(list, key){
+  const l = [...list];
+  if(key==='name') l.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  else if(key==='rating') l.sort((a,b)=>(parseFloat(b.rating)||-1)-(parseFloat(a.rating)||-1));
+  else if(key==='priceHigh') l.sort((a,b)=>(parseFloat(b.price||b.targetprice)||0)-(parseFloat(a.price||a.targetprice)||0));
+  else if(key==='priceLow') l.sort((a,b)=>(parseFloat(a.price||a.targetprice)||0)-(parseFloat(b.price||b.targetprice)||0));
+  else if(key==='recent') l.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  return l;
+}
+
+function render(){
+  const q = document.getElementById('search').value;
+  const typeFilter = document.getElementById('filterType').value;
+  const sortKey = document.getElementById('sortBy').value;
+
+  let list = state[currentTab].filter(i => matchesSearch(i,q) && (!typeFilter || i.type===typeFilter));
+  list = sortList(list, sortKey);
+
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('emptyState');
+
+  if(list.length===0){
+    grid.innerHTML='';
+    empty.style.display='block';
+    document.getElementById('emptyTitle').textContent = currentTab==='inventory' ? 'The shelf is bare' : 'Nothing on the wish list';
+    document.getElementById('emptySub').textContent = state[currentTab].length===0
+      ? (currentTab==='inventory' ? 'Add your first bottle to start the ledger.' : 'Add a bottle you\'re chasing.')
+      : 'No entries match your search or filter.';
+  } else {
+    empty.style.display='none';
+    grid.innerHTML = list.map(item => currentTab==='inventory' ? inventoryCard(item) : wishlistCard(item)).join('');
+  }
+  updateStats();
+}
+
+function inventoryCard(item){
+  const rating = item.rating!==undefined && item.rating!=='' ? parseFloat(item.rating) : null;
+  const dataBits = [];
+  if(item.proof) dataBits.push(`<span>PROOF <b>${escapeHtml(item.proof)}</b></span>`);
+  if(item.age) dataBits.push(`<span>AGE <b>${escapeHtml(item.age)}</b></span>`);
+  if(item.mashbill) dataBits.push(`<span>MASH <b>${escapeHtml(item.mashbill)}</b></span>`);
+  const metaBits = [];
+  if(item.price) metaBits.push(fmtMoney(item.price));
+  if(item.date) metaBits.push(item.date);
+  if(item.store) metaBits.push(escapeHtml(item.store));
+
+  return `
+  <div class="card">
+    ${rating!==null ? `<div class="badge mono" style="background:${ratingColor(rating)}">${rating}</div>` : ''}
+    <div class="card-eyebrow">${escapeHtml(item.type || 'Whiskey')}</div>
+    <div class="card-name">${escapeHtml(item.name)}</div>
+    <div class="card-sub">${[item.distillery, item.region].filter(Boolean).map(escapeHtml).join(' — ')}</div>
+    <hr class="rule">
+    ${dataBits.length ? `<div class="data-row">${dataBits.join('')}</div>` : ''}
+    ${item.notes ? `<div class="notes">"${escapeHtml(item.notes)}"</div>` : ''}
+    ${metaBits.length ? `<div class="meta-line">${metaBits.join(' · ')}</div>` : ''}
+    <div class="card-actions">
+      <button class="btn btn-small" onclick="editEntry('${item.id}','inventory')">Edit</button>
+      <button class="btn btn-small" onclick="deleteEntry('${item.id}','inventory')">Delete</button>
+    </div>
+  </div>`;
+}
+
+function wishlistCard(item){
+  return `
+  <div class="card wish">
+    ${item.targetprice ? `<div class="badge target mono">${fmtMoney(item.targetprice)}</div>` : ''}
+    <div class="card-eyebrow">${escapeHtml(item.type || 'Whiskey')}</div>
+    <div class="card-name">${escapeHtml(item.name)}</div>
+    <div class="card-sub">${[item.distillery, item.region].filter(Boolean).map(escapeHtml).join(' — ')}</div>
+    <hr class="rule">
+    ${item.wheretofind ? `<div class="meta-line">Find it: <b style="color:var(--text)">${escapeHtml(item.wheretofind)}</b></div>` : ''}
+    ${item.notes ? `<div class="notes">"${escapeHtml(item.notes)}"</div>` : ''}
+    <div class="card-actions">
+      <button class="btn btn-small btn-primary teal" onclick="markPurchased('${item.id}')">Mark Purchased</button>
+      <button class="btn btn-small" onclick="editEntry('${item.id}','wishlist')">Edit</button>
+      <button class="btn btn-small" onclick="deleteEntry('${item.id}','wishlist')">Delete</button>
+    </div>
+  </div>`;
+}
+
+function updateStats(){
+  const inv = state.inventory;
+  document.getElementById('stat-count').textContent = inv.length;
+  const invested = inv.reduce((s,i)=> s + (parseFloat(i.price)||0), 0);
+  document.getElementById('stat-invested').textContent = invested ? fmtMoney(invested) : '$0';
+  const rated = inv.filter(i=>i.rating!==undefined && i.rating!=='').map(i=>parseFloat(i.rating));
+  document.getElementById('stat-rating').textContent = rated.length ? (rated.reduce((a,b)=>a+b,0)/rated.length).toFixed(1) : '—';
+  document.getElementById('stat-wish').textContent = state.wishlist.length;
+}
+
+function openForm(){
+  editingId = null;
+  document.getElementById('modalTitle').textContent = currentTab==='inventory' ? 'Add Bottle' : 'Add to Wish List';
+  document.getElementById('saveBtn').textContent = currentTab==='inventory' ? 'Save Bottle' : 'Save to Wish List';
+  document.getElementById('entryForm').reset();
+  document.getElementById('f-id').value = '';
+  toggleFieldSets();
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('f-name').focus();
+}
+
+function toggleFieldSets(){
+  document.getElementById('inventoryFields').style.display = currentTab==='inventory' ? 'block' : 'none';
+  document.getElementById('wishlistFields').style.display = currentTab==='wishlist' ? 'block' : 'none';
+  document.getElementById('notesLabel').textContent = currentTab==='inventory' ? 'Tasting Notes' : 'Notes';
+}
+
+function closeForm(){
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function editEntry(id, tab){
+  const item = state[tab].find(i=>i.id===id);
+  if(!item) return;
+  editingId = id;
+  const prevTab = currentTab;
+  currentTab = tab; // ensure correct field set shows
+  document.getElementById('modalTitle').textContent = 'Edit Entry';
+  document.getElementById('saveBtn').textContent = 'Save Changes';
+  document.getElementById('f-id').value = item.id;
+  document.getElementById('f-name').value = item.name || '';
+  document.getElementById('f-distillery').value = item.distillery || '';
+  document.getElementById('f-type').value = item.type || '';
+  document.getElementById('f-region').value = item.region || '';
+  document.getElementById('f-proof').value = item.proof || '';
+  document.getElementById('f-age').value = item.age || '';
+  document.getElementById('f-mashbill').value = item.mashbill || '';
+  document.getElementById('f-price').value = item.price || '';
+  document.getElementById('f-date').value = item.date || '';
+  document.getElementById('f-store').value = item.store || '';
+  document.getElementById('f-rating').value = item.rating || '';
+  document.getElementById('f-targetprice').value = item.targetprice || '';
+  document.getElementById('f-wheretofind').value = item.wheretofind || '';
+  document.getElementById('f-notes').value = item.notes || '';
+  toggleFieldSets();
+  currentTab = prevTab;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function saveEntry(e){
+  e.preventDefault();
+  const id = document.getElementById('f-id').value;
+  const targetList = editingId ? findListOfId(id) : currentTab;
+  const entry = {
+    id: id || 'w' + Date.now() + Math.random().toString(36).slice(2,7),
+    name: document.getElementById('f-name').value.trim(),
+    distillery: document.getElementById('f-distillery').value.trim(),
+    type: document.getElementById('f-type').value.trim(),
+    region: document.getElementById('f-region').value.trim(),
+    proof: document.getElementById('f-proof').value.trim(),
+    age: document.getElementById('f-age').value.trim(),
+    mashbill: document.getElementById('f-mashbill').value.trim(),
+    notes: document.getElementById('f-notes').value.trim(),
+    createdAt: Date.now()
+  };
+  if(targetList==='inventory'){
+    entry.price = document.getElementById('f-price').value.trim();
+    entry.date = document.getElementById('f-date').value;
+    entry.store = document.getElementById('f-store').value.trim();
+    entry.rating = document.getElementById('f-rating').value;
+  } else {
+    entry.targetprice = document.getElementById('f-targetprice').value.trim();
+    entry.wheretofind = document.getElementById('f-wheretofind').value.trim();
+  }
+
+  if(id){
+    const list = state[targetList];
+    const idx = list.findIndex(i=>i.id===id);
+    entry.createdAt = list[idx].createdAt;
+    list[idx] = entry;
+  } else {
+    state[targetList].unshift(entry);
+  }
+  persist();
+  closeForm();
+  populateTypeFilter();
+  render();
+}
+
+function findListOfId(id){
+  if(state.inventory.find(i=>i.id===id)) return 'inventory';
+  return 'wishlist';
+}
+
+function deleteEntry(id, tab){
+  if(!confirm('Delete this entry? This cannot be undone.')) return;
+  state[tab] = state[tab].filter(i=>i.id!==id);
+  persist();
+  render();
+}
+
+function markPurchased(id){
+  const item = state.wishlist.find(i=>i.id===id);
+  if(!item) return;
+  // move to inventory, prefill price from target price
+  const moved = {
+    ...item,
+    price: item.targetprice || '',
+    date: new Date().toISOString().slice(0,10),
+    store: item.wheretofind || '',
+    rating: ''
+  };
+  delete moved.targetprice;
+  delete moved.wheretofind;
+  state.wishlist = state.wishlist.filter(i=>i.id!==id);
+  state.inventory.unshift(moved);
+  persist();
+  switchTab('inventory');
+  editEntry(moved.id, 'inventory'); // open it so they can confirm price/store/add rating
+}
+
+function exportData(){
+  const payload = { inventory: state.inventory, wishlist: state.wishlist, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'whiskey-cabinet-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const data = JSON.parse(evt.target.result);
+      if(!confirm('Import will merge with your current data. Continue?')) return;
+      if(Array.isArray(data.inventory)) state.inventory = state.inventory.concat(data.inventory);
+      if(Array.isArray(data.wishlist)) state.wishlist = state.wishlist.concat(data.wishlist);
+      persist();
+      populateTypeFilter();
+      render();
+      alert('Import complete.');
+    }catch(err){
+      alert('Could not read that file. Make sure it\'s a backup exported from The Cabinet.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+document.getElementById('overlay').addEventListener('click', function(e){
+  if(e.target === this) closeForm();
+});
+document.addEventListener('keydown', function(e){
+  if(e.key==='Escape'){ closeForm(); closeSyncModal(); }
+});
+
+/* ---------- Firebase Firestore Sync (sync-code based) ---------- */
+const SYNC_KEY = 'whiskeyCabinet_syncCode';
+const ADJECTIVES = ['OAK','AMBER','COPPER','SMOKY','PEAT','CASK','BARREL','CHAR','RYE','MALT','CEDAR','EMBER'];
+const NOUNS = ['STILL','BARREL','CASK','GLEN','GRAIN','BOTTLE','VAULT','CELLAR','FLASK','DRAM'];
+
+let db = null;
+let syncCode = null;
+let unsubscribe = null;
+let pushTimer = null;
+let applyingRemote = false;
+
+function firebaseReady(){
+  return typeof firebase !== 'undefined' && FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY';
+}
+
+function initFirebase(){
+  if(!firebaseReady()) return false;
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    return true;
+  }catch(e){
+    console.error('Firebase init failed', e);
+    return false;
+  }
+}
+
+function generateSyncCode(){
+  const a = ADJECTIVES[Math.floor(Math.random()*ADJECTIVES.length)];
+  const n = NOUNS[Math.floor(Math.random()*NOUNS.length)];
+  const num = Math.floor(1000 + Math.random()*9000);
+  return `${a}-${n}-${num}`;
+}
+
+function loadSyncCode(){
+  syncCode = localStorage.getItem(SYNC_KEY) || null;
+}
+function setSyncStatus(text){
+  document.getElementById('syncStatus').textContent = text;
+}
+function refreshSyncUI(){
+  const btn = document.getElementById('syncBtn');
+  const connected = !!syncCode;
+  btn.textContent = connected ? 'Cloud Sync: Connected' : 'Cloud Sync';
+  document.getElementById('syncNotConnected').style.display = connected ? 'none' : 'block';
+  document.getElementById('syncConnected').style.display = connected ? 'block' : 'none';
+  if(connected){
+    document.getElementById('sync-code-display').value = syncCode;
+    setSyncStatus('Connected — code ' + syncCode);
+  } else {
+    setSyncStatus('Not connected — data is stored locally in this browser only.');
+  }
+}
+
+function openSyncModal(){
+  if(!firebaseReady()){
+    alert('Cloud sync isn\'t configured yet in this file — the Firebase project details need to be pasted into FIREBASE_CONFIG near the top of the script.');
+    return;
+  }
+  document.getElementById('sync-code-input').value = '';
+  refreshSyncUI();
+  document.getElementById('syncOverlay').classList.add('open');
+}
+function closeSyncModal(){
+  document.getElementById('syncOverlay').classList.remove('open');
+}
+function copySyncCode(){
+  const el = document.getElementById('sync-code-display');
+  el.select();
+  document.execCommand('copy');
+}
+
+async function startFreshSync(){
+  if(!initFirebase()) return;
+  const code = generateSyncCode();
+  try{
+    setSyncStatus('Creating…');
+    await db.collection('cabinets').doc(code).set({
+      inventory: state.inventory,
+      wishlist: state.wishlist,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    syncCode = code;
+    localStorage.setItem(SYNC_KEY, code);
+    attachListener();
+    refreshSyncUI();
+    closeSyncModal();
+  }catch(err){
+    alert('Could not create a sync code: ' + err.message);
+    setSyncStatus('Sync error.');
+  }
+}
+
+async function connectWithCode(){
+  if(!initFirebase()) return;
+  const code = document.getElementById('sync-code-input').value.trim().toUpperCase();
+  if(!code){ alert('Enter a sync code.'); return; }
+  try{
+    setSyncStatus('Connecting…');
+    const doc = await db.collection('cabinets').doc(code).get();
+    if(!doc.exists){ alert('No cabinet found with that code. Check it and try again.'); setSyncStatus('Sync error.'); return; }
+    const remote = doc.data();
+    applyingRemote = true;
+    state.inventory = remote.inventory || [];
+    state.wishlist = remote.wishlist || [];
+    persistLocalOnly();
+    applyingRemote = false;
+    syncCode = code;
+    localStorage.setItem(SYNC_KEY, code);
+    attachListener();
+    populateTypeFilter();
+    render();
+    refreshSyncUI();
+    closeSyncModal();
+  }catch(err){
+    alert('Could not connect: ' + err.message);
+    setSyncStatus('Sync error.');
+  }
+}
+
+function disconnectSync(){
+  if(!confirm('Disconnect cloud sync? Your local data stays on this device, but it will stop syncing.')) return;
+  if(unsubscribe) unsubscribe();
+  unsubscribe = null;
+  localStorage.removeItem(SYNC_KEY);
+  syncCode = null;
+  refreshSyncUI();
+  closeSyncModal();
+}
+
+function attachListener(){
+  if(!db || !syncCode) return;
+  if(unsubscribe) unsubscribe();
+  unsubscribe = db.collection('cabinets').doc(syncCode).onSnapshot(function(doc){
+    if(!doc.exists) return;
+    if(doc.metadata.hasPendingWrites) return; // ignore our own optimistic echo
+    const remote = doc.data();
+    applyingRemote = true;
+    state.inventory = remote.inventory || [];
+    state.wishlist = remote.wishlist || [];
+    persistLocalOnly();
+    applyingRemote = false;
+    populateTypeFilter();
+    render();
+    setSyncStatus('Synced just now — code ' + syncCode);
+  }, function(err){
+    setSyncStatus('Could not reach sync server — showing last synced data.');
+  });
+}
+
+function persistLocalOnly(){
+  localStorage.setItem(STORAGE_KEYS.inventory, JSON.stringify(state.inventory));
+  localStorage.setItem(STORAGE_KEYS.wishlist, JSON.stringify(state.wishlist));
+}
+
+function queuePush(){
+  if(!syncCode || !db || applyingRemote) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(async function(){
+    try{
+      setSyncStatus('Syncing…');
+      await db.collection('cabinets').doc(syncCode).set({
+        inventory: state.inventory,
+        wishlist: state.wishlist,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      setSyncStatus('Synced just now — code ' + syncCode);
+    }catch(err){
+      setSyncStatus('Sync error — changes saved locally, will retry next edit.');
+    }
+  }, 600);
+}
+
+load();
+loadSyncCode();
+populateTypeFilter();
+render();
+if(typeof firebase === 'undefined'){
+  var el = document.createElement('div');
+  el.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#a0453a;color:#fff;padding:12px 16px;font-family:monospace;font-size:12px;z-index:9999;';
+  el.textContent = 'Firebase SDK did not load — check your internet connection or an ad blocker/extension blocking gstatic.com.';
+  document.body.prepend(el);
+}
+if(syncCode && initFirebase()){ attachListener(); refreshSyncUI(); }
+else { refreshSyncUI(); }
+</script>
+</body>
+</html>
