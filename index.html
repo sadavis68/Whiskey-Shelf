@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Cabinet — Whiskey Tracker</title>
+<title>The Spirit Room — Whiskey Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -20,13 +20,19 @@
     --teal-bright:#6fa89d;
     --gold:#d4a24c;
     --danger:#a0453a;
+    --burgundy:#8c2f39;
+    --burgundy-bright:#b6505c;
+    --emerald:#2f6b52;
+    --emerald-bright:#3f9470;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
     background:
-      radial-gradient(ellipse at top left, rgba(190,106,48,0.08), transparent 45%),
-      radial-gradient(ellipse at bottom right, rgba(79,122,114,0.06), transparent 50%),
+      radial-gradient(ellipse at top left, rgba(190,106,48,0.10), transparent 42%),
+      radial-gradient(ellipse at top right, rgba(140,47,57,0.10), transparent 45%),
+      radial-gradient(ellipse at bottom left, rgba(47,107,82,0.08), transparent 48%),
+      radial-gradient(ellipse at bottom right, rgba(79,122,114,0.08), transparent 50%),
       var(--bg);
     color:var(--text);
     font-family:'Inter',sans-serif;
@@ -50,6 +56,13 @@
     color:var(--copper-bright);
     margin:0 0 10px;
   }
+  .brand-row{
+    display:flex;
+    align-items:center;
+    gap:22px;
+    flex-wrap:wrap;
+  }
+  .emblem{flex-shrink:0;}
   h1.title{
     font-size:clamp(32px,5vw,52px);
     font-weight:600;
@@ -62,7 +75,7 @@
     font-size:15px;
     font-style:italic;
     font-family:'Fraunces',serif;
-    margin:0 0 26px;
+    margin:0;
   }
 
   .stats-strip{
@@ -70,6 +83,7 @@
     gap:0;
     flex-wrap:wrap;
     border-top:1px solid var(--rule);
+    margin-top:26px;
   }
   .stat{
     flex:1;
@@ -355,14 +369,49 @@
 <body>
 
 <header class="top">
-  <p class="eyebrow">Personal Cellar Ledger</p>
-  <h1 class="title display">The Cabinet</h1>
-  <p class="tagline">Every bottle earns its shelf. Every wish gets a line.</p>
+  <div class="brand-row">
+    <svg class="emblem" viewBox="0 0 160 160" width="86" height="86" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="80" cy="80" r="78" fill="var(--surface-alt)" stroke="var(--rule)" stroke-width="1.5"/>
+      <line x1="138.0" y1="80.0" x2="157.0" y2="80.0" stroke="var(--copper)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="136.0" y1="95.0" x2="154.4" y2="99.9" stroke="var(--burgundy)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="130.2" y1="109.0" x2="146.7" y2="118.5" stroke="var(--copper)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="121.0" y1="121.0" x2="134.4" y2="134.4" stroke="var(--burgundy)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="109.0" y1="130.2" x2="118.5" y2="146.7" stroke="var(--copper)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="95.0" y1="136.0" x2="99.9" y2="154.4" stroke="var(--burgundy)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="80.0" y1="138.0" x2="80.0" y2="157.0" stroke="var(--copper)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="65.0" y1="136.0" x2="60.1" y2="154.4" stroke="var(--burgundy)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="51.0" y1="130.2" x2="41.5" y2="146.7" stroke="var(--copper)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="39.0" y1="121.0" x2="25.6" y2="134.4" stroke="var(--burgundy)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="29.8" y1="109.0" x2="13.3" y2="118.5" stroke="var(--copper)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="24.0" y1="95.0" x2="5.6" y2="99.9" stroke="var(--burgundy)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="22.0" y1="80.0" x2="3.0" y2="80.0" stroke="var(--copper)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="24.0" y1="65.0" x2="5.6" y2="60.1" stroke="var(--burgundy)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="29.8" y1="51.0" x2="13.3" y2="41.5" stroke="var(--copper)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="39.0" y1="39.0" x2="25.6" y2="25.6" stroke="var(--burgundy)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="51.0" y1="29.8" x2="41.5" y2="13.3" stroke="var(--copper)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="65.0" y1="24.0" x2="60.1" y2="5.6" stroke="var(--burgundy)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="80.0" y1="22.0" x2="80.0" y2="3.0" stroke="var(--copper)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="95.0" y1="24.0" x2="99.9" y2="5.6" stroke="var(--burgundy)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="109.0" y1="29.8" x2="118.5" y2="13.3" stroke="var(--copper)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="121.0" y1="39.0" x2="134.4" y2="25.6" stroke="var(--burgundy)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="130.2" y1="51.0" x2="146.7" y2="41.5" stroke="var(--copper)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="136.0" y1="65.0" x2="154.4" y2="60.1" stroke="var(--burgundy)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+      <circle cx="80" cy="80" r="56" fill="var(--bg)" stroke="var(--gold)" stroke-width="1.5"/>
+      <path d="M62,50 L98,50 L92,110 L68,110 Z" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M64.8,78 L95.2,78 L92,110 L68,110 Z" fill="var(--copper-bright)" opacity="0.9"/>
+      <rect x="72" y="66" width="9" height="9" fill="var(--emerald-bright)" opacity="0.85" transform="rotate(20 76.5 70.5)"/>
+    </svg>
+    <div>
+      <p class="eyebrow">Personal Cellar Ledger</p>
+      <h1 class="title display">The Spirit Room</h1>
+      <p class="tagline">Every bottle earns its shelf. Every wish gets a line.</p>
+    </div>
+  </div>
   <div class="stats-strip">
-    <div class="stat"><div class="stat-value mono" id="stat-count">0</div><div class="stat-label">bottles held</div></div>
-    <div class="stat"><div class="stat-value mono" id="stat-invested">$0</div><div class="stat-label">invested</div></div>
-    <div class="stat"><div class="stat-value mono" id="stat-rating">—</div><div class="stat-label">avg rating</div></div>
-    <div class="stat"><div class="stat-value mono" id="stat-wish">0</div><div class="stat-label">on wish list</div></div>
+    <div class="stat"><div class="stat-value mono" id="stat-count" style="color:var(--copper-bright);">0</div><div class="stat-label">bottles held</div></div>
+    <div class="stat"><div class="stat-value mono" id="stat-invested" style="color:var(--gold);">$0</div><div class="stat-label">invested</div></div>
+    <div class="stat"><div class="stat-value mono" id="stat-rating" style="color:var(--burgundy-bright);">—</div><div class="stat-label">avg rating</div></div>
+    <div class="stat"><div class="stat-value mono" id="stat-wish" style="color:var(--teal-bright);">0</div><div class="stat-label">on wish list</div></div>
   </div>
 </header>
 
@@ -480,7 +529,7 @@
   <div class="modal">
     <h2 class="display">Cloud Sync</h2>
     <p style="color:var(--muted);font-size:13px;line-height:1.5;margin-top:-8px;">
-      Syncs your cabinet across devices in real time using a sync code — no account needed. Use the same code on every device.
+      Syncs your collection across devices in real time using a sync code — no account needed. Use the same code on every device.
     </p>
 
     <div id="syncNotConnected">
@@ -504,7 +553,7 @@
         <input type="text" id="sync-code-display" readonly style="font-family:'IBM Plex Mono',monospace;letter-spacing:0.05em;">
       </div>
       <p class="note" style="color:var(--muted);font-size:11.5px;font-family:'IBM Plex Mono',monospace;line-height:1.5;">
-        Enter this exact code on your other devices to connect them to the same cabinet.
+        Enter this exact code on your other devices to connect them to the same collection.
       </p>
       <div class="modal-actions" style="justify-content:space-between;">
         <button type="button" class="btn" onclick="disconnectSync()">Disconnect</button>
@@ -583,6 +632,26 @@ function populateTypeFilter(){
   sel.value = types.includes(current) ? current : '';
 }
 
+function typeColor(type){
+  const map = {
+    'bourbon': 'var(--copper-bright)',
+    'wheated bourbon': 'var(--gold)',
+    'rye': 'var(--burgundy-bright)',
+    'scotch': 'var(--emerald-bright)',
+    'single malt': 'var(--emerald-bright)',
+    'irish': 'var(--teal-bright)',
+    'japanese': 'var(--gold)',
+    'blended': 'var(--muted)'
+  };
+  const key = (type || '').trim().toLowerCase();
+  if(map[key]) return map[key];
+  // fallback: hash any custom type name to a consistent color from the palette
+  const palette = ['var(--copper-bright)','var(--burgundy-bright)','var(--emerald-bright)','var(--teal-bright)','var(--gold)'];
+  let hash = 0;
+  for(let i=0;i<key.length;i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  return palette[hash % palette.length];
+}
+
 function ratingColor(r){
   // interpolate muted brown -> gold across 0-10
   const t = Math.max(0, Math.min(10, r)) / 10;
@@ -657,8 +726,8 @@ function inventoryCard(item){
 
   return `
   <div class="card">
-    ${rating!==null ? `<div class="badge mono" style="background:${ratingColor(rating)}">${rating}</div>` : ''}
-    <div class="card-eyebrow">${escapeHtml(item.type || 'Whiskey')}</div>
+    ${rating!==null ? `<div class="badge mono" style="background:${ratingColor(rating)};${rating>=9?'box-shadow:0 0 10px rgba(212,162,76,0.7), inset 0 0 0 2px rgba(0,0,0,0.15);':''}">${rating}</div>` : ''}
+    <div class="card-eyebrow" style="color:${typeColor(item.type)}">${escapeHtml(item.type || 'Whiskey')}</div>
     <div class="card-name">${escapeHtml(item.name)}</div>
     <div class="card-sub">${[item.distillery, item.region].filter(Boolean).map(escapeHtml).join(' — ')}</div>
     <hr class="rule">
@@ -676,7 +745,7 @@ function wishlistCard(item){
   return `
   <div class="card wish">
     ${item.targetprice ? `<div class="badge target mono">${fmtMoney(item.targetprice)}</div>` : ''}
-    <div class="card-eyebrow">${escapeHtml(item.type || 'Whiskey')}</div>
+    <div class="card-eyebrow" style="color:${typeColor(item.type)}">${escapeHtml(item.type || 'Whiskey')}</div>
     <div class="card-name">${escapeHtml(item.name)}</div>
     <div class="card-sub">${[item.distillery, item.region].filter(Boolean).map(escapeHtml).join(' — ')}</div>
     <hr class="rule">
@@ -844,7 +913,7 @@ function exportData(){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'whiskey-cabinet-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.download = 'spirit-room-backup-' + new Date().toISOString().slice(0,10) + '.json';
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -864,7 +933,7 @@ function importData(e){
       render();
       alert('Import complete.');
     }catch(err){
-      alert('Could not read that file. Make sure it\'s a backup exported from The Cabinet.');
+      alert('Could not read that file. Make sure it\'s a backup exported from The Spirit Room.');
     }
   };
   reader.readAsText(file);
