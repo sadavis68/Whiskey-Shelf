@@ -324,6 +324,7 @@
   .field textarea{resize:vertical;min-height:60px;font-family:'Fraunces',serif;}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .row4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;}
   .modal-actions{
     display:flex;
     justify-content:flex-end;
@@ -433,8 +434,13 @@
         <div class="field"><label>Age</label><input type="text" id="f-age" placeholder="e.g. 12 yr / NAS"></div>
       </div>
       <div class="field">
-        <label>Mash Bill</label>
-        <input type="text" id="f-mashbill" placeholder="e.g. 75% corn, 21% rye, 4% barley">
+        <label>Mash Bill (%)</label>
+        <div class="row4">
+          <div class="field"><label>Corn</label><input type="number" id="f-mash-corn" min="0" max="100" step="1" placeholder="0"></div>
+          <div class="field"><label>Wheat</label><input type="number" id="f-mash-wheat" min="0" max="100" step="1" placeholder="0"></div>
+          <div class="field"><label>Rye</label><input type="number" id="f-mash-rye" min="0" max="100" step="1" placeholder="0"></div>
+          <div class="field"><label>Barley</label><input type="number" id="f-mash-barley" min="0" max="100" step="1" placeholder="0"></div>
+        </div>
       </div>
 
       <div id="inventoryFields">
@@ -444,8 +450,8 @@
           <div class="field"><label>Store</label><input type="text" id="f-store"></div>
         </div>
         <div class="field">
-          <label>Rating (0–10)</label>
-          <input type="number" id="f-rating" min="0" max="10" step="0.5">
+          <label>Rating (0–10, whole numbers)</label>
+          <input type="number" id="f-rating" min="0" max="10" step="1">
         </div>
       </div>
 
@@ -642,7 +648,8 @@ function inventoryCard(item){
   const dataBits = [];
   if(item.proof) dataBits.push(`<span>PROOF <b>${escapeHtml(item.proof)}</b></span>`);
   if(item.age) dataBits.push(`<span>AGE <b>${escapeHtml(item.age)}</b></span>`);
-  if(item.mashbill) dataBits.push(`<span>MASH <b>${escapeHtml(item.mashbill)}</b></span>`);
+  const mashText = formatMashGrains(item.mashGrains) || item.mashbill || '';
+  if(mashText) dataBits.push(`<span>MASH <b>${escapeHtml(mashText)}</b></span>`);
   const metaBits = [];
   if(item.price) metaBits.push(fmtMoney(item.price));
   if(item.date) metaBits.push(item.date);
@@ -729,7 +736,10 @@ function editEntry(id, tab){
   document.getElementById('f-region').value = item.region || '';
   document.getElementById('f-proof').value = item.proof || '';
   document.getElementById('f-age').value = item.age || '';
-  document.getElementById('f-mashbill').value = item.mashbill || '';
+  document.getElementById('f-mash-corn').value = (item.mashGrains && item.mashGrains.corn) || '';
+  document.getElementById('f-mash-wheat').value = (item.mashGrains && item.mashGrains.wheat) || '';
+  document.getElementById('f-mash-rye').value = (item.mashGrains && item.mashGrains.rye) || '';
+  document.getElementById('f-mash-barley').value = (item.mashGrains && item.mashGrains.barley) || '';
   document.getElementById('f-price').value = item.price || '';
   document.getElementById('f-date').value = item.date || '';
   document.getElementById('f-store').value = item.store || '';
@@ -740,6 +750,15 @@ function editEntry(id, tab){
   toggleFieldSets();
   currentTab = prevTab;
   document.getElementById('overlay').classList.add('open');
+}
+
+function formatMashGrains(g){
+  if(!g) return '';
+  const labels = [['corn','Corn'],['wheat','Wheat'],['rye','Rye'],['barley','Barley']];
+  const parts = labels
+    .filter(([key]) => g[key] !== undefined && g[key] !== null && g[key] !== '' && parseFloat(g[key]) > 0)
+    .map(([key,label]) => `${g[key]}% ${label}`);
+  return parts.join(', ');
 }
 
 function saveEntry(e){
@@ -754,7 +773,12 @@ function saveEntry(e){
     region: document.getElementById('f-region').value.trim(),
     proof: document.getElementById('f-proof').value.trim(),
     age: document.getElementById('f-age').value.trim(),
-    mashbill: document.getElementById('f-mashbill').value.trim(),
+    mashGrains: {
+      corn: document.getElementById('f-mash-corn').value.trim(),
+      wheat: document.getElementById('f-mash-wheat').value.trim(),
+      rye: document.getElementById('f-mash-rye').value.trim(),
+      barley: document.getElementById('f-mash-barley').value.trim()
+    },
     notes: document.getElementById('f-notes').value.trim(),
     createdAt: Date.now()
   };
@@ -762,7 +786,7 @@ function saveEntry(e){
     entry.price = document.getElementById('f-price').value.trim();
     entry.date = document.getElementById('f-date').value;
     entry.store = document.getElementById('f-store').value.trim();
-    entry.rating = document.getElementById('f-rating').value;
+    entry.rating = document.getElementById('f-rating').value ? Math.round(parseFloat(document.getElementById('f-rating').value)) : '';
   } else {
     entry.targetprice = document.getElementById('f-targetprice').value.trim();
     entry.wheretofind = document.getElementById('f-wheretofind').value.trim();
