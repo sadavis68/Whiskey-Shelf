@@ -435,13 +435,14 @@
     <h2 class="display" id="modalTitle">Add Bottle</h2>
     <form id="entryForm" onsubmit="saveEntry(event)">
       <input type="hidden" id="f-id">
-      <input type="hidden" id="f-barcode">
       <div class="field">
         <label>Name</label>
         <div style="display:flex;gap:8px;">
           <input type="text" id="f-name" required style="flex:1;">
           <button type="button" class="btn btn-small" onclick="openScanner()">📷 Scan</button>
         </div>
+        <div id="barcodeStatus" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px;"></div>
+        <input type="text" id="f-barcode" readonly style="display:none;">
       </div>
       <div class="row2">
         <div class="field">
@@ -771,6 +772,7 @@ function openForm(){
   document.getElementById('saveBtn').textContent = currentTab==='inventory' ? 'Save Bottle' : 'Save to Wish List';
   document.getElementById('entryForm').reset();
   document.getElementById('f-id').value = '';
+  document.getElementById('barcodeStatus').textContent = '';
   toggleFieldSets();
   document.getElementById('overlay').classList.add('open');
   document.getElementById('f-name').focus();
@@ -796,6 +798,7 @@ function editEntry(id, tab){
   document.getElementById('saveBtn').textContent = 'Save Changes';
   document.getElementById('f-id').value = item.id;
   document.getElementById('f-barcode').value = item.barcode || '';
+  document.getElementById('barcodeStatus').textContent = item.barcode ? ('Barcode: ' + item.barcode) : '';
   document.getElementById('f-name').value = item.name || '';
   document.getElementById('f-distillery').value = item.distillery || '';
   document.getElementById('f-type').value = item.type || '';
@@ -980,6 +983,7 @@ function onScanSuccess(decodedText){
   stopScannerCamera(function(){
     document.getElementById('scanOverlay').classList.remove('open');
     document.getElementById('f-barcode').value = code;
+    document.getElementById('barcodeStatus').textContent = 'Barcode: ' + code + ' — searching…';
     lookupBarcode(code);
   });
 }
@@ -1006,20 +1010,27 @@ function closeScanner(){
 }
 
 async function lookupBarcode(code){
+  const statusEl = document.getElementById('barcodeStatus');
   try{
     const res = await fetch('https://api.upcitemdb.com/prod/trial/lookup?upc=' + encodeURIComponent(code));
-    if(!res.ok) throw new Error('lookup failed');
+    if(!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if(data.items && data.items.length > 0){
       const item = data.items[0];
       const nameField = document.getElementById('f-name');
       const distField = document.getElementById('f-distillery');
-      if(item.title && !nameField.value) nameField.value = item.title;
-      if(item.brand && !distField.value) distField.value = item.brand;
+      let filled = [];
+      if(item.title && !nameField.value){ nameField.value = item.title; filled.push('name'); }
+      if(item.brand && !distField.value){ distField.value = item.brand; filled.push('brand'); }
+      statusEl.textContent = filled.length
+        ? ('Barcode: ' + code + ' — found a match, filled in ' + filled.join(' & '))
+        : ('Barcode: ' + code + ' — found a match, but no new fields to fill');
+    } else {
+      statusEl.textContent = 'Barcode: ' + code + ' — no match found in the product database';
     }
   }catch(err){
-    // Best-effort only — barcode number is still captured either way.
-    console.log('Barcode lookup unavailable (CORS, rate limit, or not found):', err);
+    statusEl.textContent = 'Barcode: ' + code + ' — lookup unavailable (' + err.message + ')';
+    console.log('Barcode lookup error:', err);
   }
 }
 
