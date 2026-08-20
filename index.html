@@ -441,8 +441,11 @@
           <input type="text" id="f-name" required style="flex:1;">
           <button type="button" class="btn btn-small" onclick="openScanner()">📷 Scan</button>
         </div>
+      </div>
+      <div class="field">
+        <label>Barcode / UPC</label>
+        <input type="text" id="f-barcode" placeholder="Scan above, or type manually">
         <div id="barcodeStatus" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px;"></div>
-        <input type="text" id="f-barcode" readonly style="display:none;">
       </div>
       <div class="row2">
         <div class="field">
@@ -798,7 +801,7 @@ function editEntry(id, tab){
   document.getElementById('saveBtn').textContent = 'Save Changes';
   document.getElementById('f-id').value = item.id;
   document.getElementById('f-barcode').value = item.barcode || '';
-  document.getElementById('barcodeStatus').textContent = item.barcode ? ('Barcode: ' + item.barcode) : '';
+  document.getElementById('barcodeStatus').textContent = '';
   document.getElementById('f-name').value = item.name || '';
   document.getElementById('f-distillery').value = item.distillery || '';
   document.getElementById('f-type').value = item.type || '';
@@ -983,7 +986,7 @@ function onScanSuccess(decodedText){
   stopScannerCamera(function(){
     document.getElementById('scanOverlay').classList.remove('open');
     document.getElementById('f-barcode').value = code;
-    document.getElementById('barcodeStatus').textContent = 'Barcode: ' + code + ' — searching…';
+    document.getElementById('barcodeStatus').textContent = 'Searching…';
     lookupBarcode(code);
   });
 }
@@ -1023,13 +1026,13 @@ async function lookupBarcode(code){
       if(p.product_name && !nameField.value){ nameField.value = p.product_name; filled.push('name'); }
       if(p.brands && !distField.value){ distField.value = p.brands.split(',')[0].trim(); filled.push('brand'); }
       statusEl.textContent = filled.length
-        ? ('Barcode: ' + code + ' — found a match, filled in ' + filled.join(' & '))
-        : ('Barcode: ' + code + ' — found a match, but no new fields to fill');
+        ? ('Found a match — filled in ' + filled.join(' & '))
+        : 'Found a match, but no new fields to fill';
     } else {
-      statusEl.textContent = 'Barcode: ' + code + ' — no match found in the product database';
+      statusEl.textContent = 'No match found in the product database';
     }
   }catch(err){
-    statusEl.textContent = 'Barcode: ' + code + ' — lookup unavailable (' + err.message + ')';
+    statusEl.textContent = 'Lookup unavailable (' + err.message + ')';
     console.log('Barcode lookup error:', err);
   }
 }
