@@ -1012,16 +1012,16 @@ function closeScanner(){
 async function lookupBarcode(code){
   const statusEl = document.getElementById('barcodeStatus');
   try{
-    const res = await fetch('https://api.upcitemdb.com/prod/trial/lookup?upc=' + encodeURIComponent(code));
+    const res = await fetch('https://world.openfoodfacts.org/api/v0/product/' + encodeURIComponent(code) + '.json');
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    if(data.items && data.items.length > 0){
-      const item = data.items[0];
+    if(data.status === 1 && data.product){
+      const p = data.product;
       const nameField = document.getElementById('f-name');
       const distField = document.getElementById('f-distillery');
       let filled = [];
-      if(item.title && !nameField.value){ nameField.value = item.title; filled.push('name'); }
-      if(item.brand && !distField.value){ distField.value = item.brand; filled.push('brand'); }
+      if(p.product_name && !nameField.value){ nameField.value = p.product_name; filled.push('name'); }
+      if(p.brands && !distField.value){ distField.value = p.brands.split(',')[0].trim(); filled.push('brand'); }
       statusEl.textContent = filled.length
         ? ('Barcode: ' + code + ' — found a match, filled in ' + filled.join(' & '))
         : ('Barcode: ' + code + ' — found a match, but no new fields to fill');
