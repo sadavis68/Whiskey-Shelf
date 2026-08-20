@@ -444,7 +444,10 @@
       </div>
       <div class="field">
         <label>Barcode / UPC</label>
-        <input type="text" id="f-barcode" placeholder="Scan above, or type manually">
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="f-barcode" placeholder="Scan above, or type manually" style="flex:1;">
+          <button type="button" class="btn btn-small" onclick="openBarcodeView(document.getElementById('f-barcode').value.trim())">View</button>
+        </div>
         <div id="barcodeStatus" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px;"></div>
       </div>
       <div class="row2">
@@ -563,7 +566,22 @@
   </div>
 </div>
 
+<!-- Barcode Display Modal (for scanning off-screen) -->
+<div class="overlay" id="barcodeViewOverlay">
+  <div class="modal" style="text-align:center;">
+    <h2 class="display" id="barcodeViewTitle">Barcode</h2>
+    <p style="color:var(--muted);font-size:12.5px;margin-top:-8px;">Hold this screen up to another camera or store scanner. Raise your brightness for best results.</p>
+    <div style="background:#ffffff;border-radius:8px;padding:20px 12px;margin-top:16px;">
+      <svg id="barcodeSvg"></svg>
+    </div>
+    <div class="modal-actions" style="justify-content:center;">
+      <button type="button" class="btn btn-primary" onclick="closeBarcodeView()">Done</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
 <!--
   FIREBASE SETUP — see setup instructions provided alongside this file.
@@ -735,6 +753,7 @@ function inventoryCard(item){
     ${item.notes ? `<div class="notes">"${escapeHtml(item.notes)}"</div>` : ''}
     ${metaBits.length ? `<div class="meta-line">${metaBits.join(' · ')}</div>` : ''}
     <div class="card-actions">
+      ${item.barcode ? `<button class="btn btn-small" onclick="openBarcodeView('${item.barcode}')">Barcode</button>` : ''}
       <button class="btn btn-small" onclick="editEntry('${item.id}','inventory')">Edit</button>
       <button class="btn btn-small" onclick="deleteEntry('${item.id}','inventory')">Delete</button>
     </div>
@@ -948,10 +967,57 @@ document.getElementById('overlay').addEventListener('click', function(e){
   if(e.target === this) closeForm();
 });
 document.addEventListener('keydown', function(e){
-  if(e.key==='Escape'){ closeForm(); closeSyncModal(); closeScanner(); }
+  if(e.key==='Escape'){ closeForm(); closeSyncModal(); closeScanner(); closeBarcodeView(); }
 });
 
 /* ---------- Barcode Scanner ---------- */
+
+function guessBarcodeFormat(code){
+  const digits = code.replace(/\s/g, '');
+  if(!/^\d+$/.test(digits)) return 'CODE128';
+  if(digits.length === 8) return 'EAN8';
+  if(digits.length === 12) return 'UPC';
+  if(digits.length === 13) return 'EAN13';
+  return 'CODE128';
+}
+
+function openBarcodeView(code){
+  if(!code){
+    alert('No barcode saved for this bottle yet — scan or type one in first.');
+    return;
+  }
+  if(typeof JsBarcode === 'undefined'){
+    alert('The barcode rendering library did not load — check your internet connection or an ad blocker.');
+    return;
+  }
+  document.getElementById('barcodeViewTitle').textContent = code;
+  try{
+    JsBarcode('#barcodeSvg', code, {
+      format: guessBarcodeFormat(code),
+      lineColor: '#000000',
+      background: '#ffffff',
+      width: 2.5,
+      height: 90,
+      displayValue: true,
+      fontSize: 16,
+      margin: 10
+    });
+  }catch(err){
+    // Fall back to CODE128, which accepts nearly any characters
+    try{
+      JsBarcode('#barcodeSvg', code, { format: 'CODE128', lineColor: '#000', background: '#fff', width: 2.5, height: 90, displayValue: true, fontSize: 16, margin: 10 });
+    }catch(err2){
+      alert('Could not render this barcode: ' + err2.message);
+      return;
+    }
+  }
+  document.getElementById('barcodeViewOverlay').classList.add('open');
+}
+
+function closeBarcodeView(){
+  document.getElementById('barcodeViewOverlay').classList.remove('open');
+}
+
 let html5QrCode = null;
 
 function openScanner(){
