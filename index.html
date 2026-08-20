@@ -435,9 +435,13 @@
     <h2 class="display" id="modalTitle">Add Bottle</h2>
     <form id="entryForm" onsubmit="saveEntry(event)">
       <input type="hidden" id="f-id">
+      <input type="hidden" id="f-barcode">
       <div class="field">
         <label>Name</label>
-        <input type="text" id="f-name" required>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="f-name" required style="flex:1;">
+          <button type="button" class="btn btn-small" onclick="openScanner()">📷 Scan</button>
+        </div>
       </div>
       <div class="row2">
         <div class="field">
@@ -542,6 +546,20 @@
     </div>
   </div>
 </div>
+
+<!-- Barcode Scanner Modal -->
+<div class="overlay" id="scanOverlay">
+  <div class="modal">
+    <h2 class="display">Scan Barcode</h2>
+    <div id="scan-reader" style="width:100%;border-radius:6px;overflow:hidden;background:#000;min-height:200px;"></div>
+    <p id="scanStatusText" style="color:var(--muted);font-size:12.5px;margin-top:12px;">Point your camera at the barcode.</p>
+    <div class="modal-actions">
+      <button type="button" class="btn" onclick="closeScanner()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
 <!--
   FIREBASE SETUP — see setup instructions provided alongside this file.
@@ -700,6 +718,7 @@ function inventoryCard(item){
   if(item.price) metaBits.push(fmtMoney(item.price));
   if(item.date) metaBits.push(item.date);
   if(item.store) metaBits.push(escapeHtml(item.store));
+  if(item.barcode) metaBits.push('UPC ' + escapeHtml(item.barcode));
 
   return `
   <div class="card">
@@ -776,6 +795,7 @@ function editEntry(id, tab){
   document.getElementById('modalTitle').textContent = 'Edit Entry';
   document.getElementById('saveBtn').textContent = 'Save Changes';
   document.getElementById('f-id').value = item.id;
+  document.getElementById('f-barcode').value = item.barcode || '';
   document.getElementById('f-name').value = item.name || '';
   document.getElementById('f-distillery').value = item.distillery || '';
   document.getElementById('f-type').value = item.type || '';
@@ -813,6 +833,7 @@ function saveEntry(e){
   const targetList = editingId ? findListOfId(id) : currentTab;
   const entry = {
     id: id || 'w' + Date.now() + Math.random().toString(36).slice(2,7),
+    barcode: document.getElementById('f-barcode').value.trim(),
     name: document.getElementById('f-name').value.trim(),
     distillery: document.getElementById('f-distillery').value.trim(),
     type: document.getElementById('f-type').value.trim(),
@@ -921,8 +942,86 @@ document.getElementById('overlay').addEventListener('click', function(e){
   if(e.target === this) closeForm();
 });
 document.addEventListener('keydown', function(e){
-  if(e.key==='Escape'){ closeForm(); closeSyncModal(); }
+  if(e.key==='Escape'){ closeForm(); closeSyncModal(); closeScanner(); }
 });
+
+/* ---------- Barcode Scanner ---------- */
+let html5QrCode = null;
+
+function openScanner(){
+  if(typeof Html5Qrcode === 'undefined'){
+    alert('The barcode scanner library did not load — check your internet connection or an ad blocker.');
+    return;
+  }
+  document.getElementById('scanStatusText').textContent = 'Point your camera at the barcode.';
+  document.getElementById('scanOverlay').classList.add('open');
+
+  const formatsToSupport = [
+    Html5QrcodeSupportedFormats.EAN_13,
+    Html5QrcodeSupportedFormats.EAN_8,
+    Html5QrcodeSupportedFormats.UPC_A,
+    Html5QrcodeSupportedFormats.UPC_E,
+    Html5QrcodeSupportedFormats.CODE_128
+  ];
+  html5QrCode = new Html5Qrcode("scan-reader", { formatsToSupport, verbose: false });
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 260, height: 140 } },
+    onScanSuccess,
+    function(){ /* per-frame miss, ignore */ }
+  ).catch(function(err){
+    document.getElementById('scanStatusText').textContent = 'Could not access the camera: ' + err;
+  });
+}
+
+function onScanSuccess(decodedText){
+  document.getElementById('scanStatusText').textContent = 'Found ' + decodedText + ' — looking it up…';
+  const code = decodedText;
+  stopScannerCamera(function(){
+    document.getElementById('scanOverlay').classList.remove('open');
+    document.getElementById('f-barcode').value = code;
+    lookupBarcode(code);
+  });
+}
+
+function stopScannerCamera(then){
+  if(html5QrCode){
+    html5QrCode.stop().then(function(){
+      html5QrCode.clear();
+      html5QrCode = null;
+      if(then) then();
+    }).catch(function(){
+      html5QrCode = null;
+      if(then) then();
+    });
+  } else if(then){
+    then();
+  }
+}
+
+function closeScanner(){
+  stopScannerCamera(function(){
+    document.getElementById('scanOverlay').classList.remove('open');
+  });
+}
+
+async function lookupBarcode(code){
+  try{
+    const res = await fetch('https://api.upcitemdb.com/prod/trial/lookup?upc=' + encodeURIComponent(code));
+    if(!res.ok) throw new Error('lookup failed');
+    const data = await res.json();
+    if(data.items && data.items.length > 0){
+      const item = data.items[0];
+      const nameField = document.getElementById('f-name');
+      const distField = document.getElementById('f-distillery');
+      if(item.title && !nameField.value) nameField.value = item.title;
+      if(item.brand && !distField.value) distField.value = item.brand;
+    }
+  }catch(err){
+    // Best-effort only — barcode number is still captured either way.
+    console.log('Barcode lookup unavailable (CORS, rate limit, or not found):', err);
+  }
+}
 
 /* ---------- Firebase Firestore Sync (sync-code based) ---------- */
 const SYNC_KEY = 'whiskeyCabinet_syncCode';
